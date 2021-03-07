@@ -10,3 +10,15 @@ Objectives:
 - [X] Ask the user for the end date in YYYY-MM-DD format.
 - [X] The end date should not be before the begin date
 - [X] Generate a graph and open in the user’s default browser.
+
+
+
+## Installation
+
+Use the package manager [pip](https://pip.pypa.io/en/stable/) to install BS4. (python3 using alias)
+
+```bash
+python -m pip install --upgrade pip
+python -m pip install --upgrade pygal
+python -m pip install --upgrade requests
+```
