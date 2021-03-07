@@ -4,7 +4,7 @@ import os, json, datetime
 apikey = "O1RSZBGP6WA65EAI"
 
 def userPrompt():
-    tickerSymbol = input("Please Enter a Stock Ticker Symbol: ");
+    tickerSymbol = input("Please Enter a Stock Ticker Symbol: ").upper();
 
     chartType = chartInput()
 
@@ -77,7 +77,7 @@ def validate(date_info):
     except ValueError:
         raise ValueError("ERROR - Incorrect data format: should be YYYY-MM-DD")
 
-def make_graph(data , chartType):
+def makeGraph(data , chartType, chartStartDate, chartEndDate):
     ticker = data['Meta Data']['2. Symbol']
     opening = []
     highs = []
@@ -88,22 +88,23 @@ def make_graph(data , chartType):
     dataIwant = data[labels]
     for d in dataIwant:
         date = d
-        dates.append(date)
+        if chartStartDate <= date <= chartEndDate:
+            dates.append(date)
 
-        dataOpening = (dataIwant[d]["1. open"])
-        opening.append(float(dataOpening))
+            dataOpening = (dataIwant[d]["1. open"])
+            opening.append(float(dataOpening))
 
-        dataHigh = (dataIwant[d]["2. high"])
-        highs.append(float(dataHigh))
+            dataHigh = (dataIwant[d]["2. high"])
+            highs.append(float(dataHigh))
 
-        dataLow = (dataIwant[d]["3. low"])
-        lows.append(float(dataHigh))
+            dataLow = (dataIwant[d]["3. low"])
+            lows.append(float(dataLow))
 
-        dataClosing = (dataIwant[d]["4. close"])
-        closing.append(float(dataClosing))
+            dataClosing = (dataIwant[d]["4. close"])
+            closing.append(float(dataClosing))
 
     line_chart = chartType
-    line_chart.title = 'Stock Data for {} '.format(ticker)
+    line_chart.title = 'Stock Data for {}: {} to {} '.format(ticker, chartStartDate, chartEndDate)
     line_chart.x_labels = dates
     line_chart.add('Opening', opening)
     line_chart.add('High', highs)
@@ -135,7 +136,7 @@ def getJsonPage():
     req = requests.get("https://www.alphavantage.co/query?function={}&symbol={}{}&apikey={}".format(chartTimeSeries, symbol, intraDayInfo, apikey))
     print(req.url)
     data = req.json()
-    make_graph(data, chartType)
+    makeGraph(data, chartType, chartStartDate, chartEndDate)
 
 
 def main():
