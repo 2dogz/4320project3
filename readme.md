@@ -15,7 +15,7 @@ Objectives:
 
 ## Installation
 
-Use the package manager [pip](https://pip.pypa.io/en/stable/) to install BS4. (python3 using alias)
+Use the package manager [pip](https://pip.pypa.io/en/stable/) to install the requirements. (python3 using alias)
 
 ```bash
 python -m pip install --upgrade pip
