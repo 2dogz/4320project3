@@ -1,5 +1,5 @@
 import lxml, requests, pygal
-import os, json, datetime, webbrowser
+import os, json, datetime
 
 apikey = "O1RSZBGP6WA65EAI"
 
@@ -28,8 +28,6 @@ def chartInput():
             chartType = int(input("Please Enter a Chart Type (1, 2): "));
             if chartType not in [1,2]:
                 print("Enter a 1 or 2 for Chart Type")
-                # TO DO
-                # CREATE SWTICH 1 = BAR 2 = LINE
             else:
                 return chartType
         except ValueError:
@@ -55,7 +53,7 @@ def timeSeriesInput():
 def dateInputStart():
     while True:
         try:
-            startDate = input("Enter the Start Date (YYYY-MM-DD): ")
+            startDate = input("\nEnter the Start Date (YYYY-MM-DD): ")
             validate(startDate)
             return startDate
         except ValueError:
@@ -64,7 +62,7 @@ def dateInputStart():
 def dateInputEnd(startDate):
     while True:
         try:
-            endDate = input("Enter the End Date (YYYY-MM-DD): ")
+            endDate = input("\nEnter the End Date (YYYY-MM-DD): ")
             validate(endDate)
             if endDate < startDate:
                 print("The End Date Must be After The Start Date")
@@ -79,6 +77,39 @@ def validate(date_info):
     except ValueError:
         raise ValueError("ERROR - Incorrect data format: should be YYYY-MM-DD")
 
+def make_graph(data):
+    ticker = data['Meta Data']['2. Symbol']
+    opening = []
+    highs = []
+    lows = []
+    closing = []
+    dates = []
+    labels = list(data)[1]
+    dataIwant = data[labels]
+    for d in dataIwant:
+        date = d
+        dates.append(date)
+
+        dataOpening = (dataIwant[d]["1. open"])
+        opening.append(float(dataOpening))
+
+        dataHigh = (dataIwant[d]["2. high"])
+        highs.append(float(dataHigh))
+
+        dataLow = (dataIwant[d]["3. low"])
+        lows.append(float(dataHigh))
+
+        dataClosing = (dataIwant[d]["4. close"])
+        closing.append(float(dataClosing))
+
+    line_chart = pygal.Line()
+    line_chart.title = 'Stock Data for {} '.format(ticker)
+    line_chart.x_labels = dates
+    line_chart.add('Opening', opening)
+    line_chart.add('High', highs)
+    line_chart.add('Low', lows)
+    line_chart.add('Closing', closing)
+    line_chart.render_in_browser()
 
 def getJsonPage():
     info = userPrompt()
@@ -90,7 +121,10 @@ def getJsonPage():
     elif chartType == 2: chartType = "Line"
 
     chartTimeSeries = info[2]
-    if chartTimeSeries == 1: chartTimeSeries = "TIME_SERIES_INTRADAY"
+    intraDayInfo = ""
+    if chartTimeSeries == 1:
+        chartTimeSeries = "TIME_SERIES_INTRADAY"
+        intraDayInfo = "&interval=60min"
     elif chartTimeSeries == 2: chartTimeSeries = "TIME_SERIES_DAILY"
     elif chartTimeSeries == 3: chartTimeSeries = "TIME_SERIES_WEEKLY"
     elif chartTimeSeries == 4: chartTimeSeries = "TIME_SERIES_MONTHLY"
@@ -98,11 +132,11 @@ def getJsonPage():
     chartStartDate = info[3]
     chartEndDate = info[4]
 
-    data = requests.get("https://www.alphavantage.co/query?function={}&symbol={}&interval=5min&apikey={}".format(chartTimeSeries, symbol, apikey)).json()
+    req = requests.get("https://www.alphavantage.co/query?function={}&symbol={}{}&apikey={}".format(chartTimeSeries, symbol, intraDayInfo, apikey))
+    print(req.url)
+    data = req.json()
+    make_graph(data)
 
-    with open('data.html', 'w') as outfile:
-        json.dump(data, outfile)
-    webbrowser.open('file://' + os.path.realpath("data.html"))
 
 def main():
     getJsonPage()
