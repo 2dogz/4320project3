@@ -77,7 +77,7 @@ def validate(date_info):
     except ValueError:
         raise ValueError("ERROR - Incorrect data format: should be YYYY-MM-DD")
 
-def make_graph(data):
+def make_graph(data , chartType):
     ticker = data['Meta Data']['2. Symbol']
     opening = []
     highs = []
@@ -102,7 +102,7 @@ def make_graph(data):
         dataClosing = (dataIwant[d]["4. close"])
         closing.append(float(dataClosing))
 
-    line_chart = pygal.Line()
+    line_chart = chartType
     line_chart.title = 'Stock Data for {} '.format(ticker)
     line_chart.x_labels = dates
     line_chart.add('Opening', opening)
@@ -117,8 +117,8 @@ def getJsonPage():
     symbol = info[0]
 
     chartType = info[1]
-    if chartType == 1: chartType = "Bar"
-    elif chartType == 2: chartType = "Line"
+    if chartType == 1: chartType = pygal.Bar()
+    elif chartType == 2: chartType = pygal.Line()
 
     chartTimeSeries = info[2]
     intraDayInfo = ""
@@ -135,11 +135,16 @@ def getJsonPage():
     req = requests.get("https://www.alphavantage.co/query?function={}&symbol={}{}&apikey={}".format(chartTimeSeries, symbol, intraDayInfo, apikey))
     print(req.url)
     data = req.json()
-    make_graph(data)
+    make_graph(data, chartType)
 
 
 def main():
-    getJsonPage()
+    keepGoing = True
+    while keepGoing:
+        getJsonPage()
+        flag = input("Would you like to continue? Enter (Y/N)")
+        if flag.lower() != "y":
+            keepGoing = False
 
 if __name__ == '__main__':
     main()
