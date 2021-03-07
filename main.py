@@ -31,7 +31,7 @@ def chartInput():
             else:
                 return chartType
         except ValueError:
-             print("ERROR - Please Enter an Integer")
+             print("ERROR - Enter an Integer")
 
 def timeSeriesInput():
     while True:
@@ -48,7 +48,7 @@ def timeSeriesInput():
             else:
                 return chartTimeSeries
         except ValueError:
-             print("ERROR - Please Enter an Integer")
+             print("ERROR - Enter an Integer")
 
 def dateInputStart():
     while True:
@@ -57,7 +57,7 @@ def dateInputStart():
             validate(startDate)
             return startDate
         except ValueError:
-            print("Please Enter Valid Date")
+            print("ERROR - Enter a Valid Date")
 
 def dateInputEnd(startDate):
     while True:
@@ -69,13 +69,13 @@ def dateInputEnd(startDate):
             else:
                 return endDate
         except ValueError:
-            print("please enter valid date")
+            print("ERROR - Enter a Valid Date")
 
 def validate(date_info):
     try:
         datetime.datetime.strptime(date_info, '%Y-%m-%d')
     except ValueError:
-        raise ValueError("ERROR - Incorrect data format: should be YYYY-MM-DD")
+        print("ERROR - Incorrect Data Format: should be YYYY-MM-DD")
 
 def makeGraph(data , chartType, chartStartDate, chartEndDate):
     ticker = data['Meta Data']['2. Symbol']
