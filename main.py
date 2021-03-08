@@ -136,7 +136,10 @@ def getJsonPage():
     req = requests.get("https://www.alphavantage.co/query?function={}&symbol={}{}&apikey={}".format(chartTimeSeries, symbol, intraDayInfo, apikey))
     print(req.url)
     data = req.json()
-    makeGraph(data, chartType, chartStartDate, chartEndDate)
+    if 'Invalid API call' not in req.text:
+        makeGraph(data, chartType, chartStartDate, chartEndDate)
+    else:
+        print("The Ticker You Entered is Not in The API\n")
 
 
 def main():
