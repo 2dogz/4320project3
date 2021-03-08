@@ -19,6 +19,8 @@ Use the package manager [pip](https://pip.pypa.io/en/stable/) to install the req
 
 ```bash
 python -m pip install --upgrade pip
+python -m pip install --upgrade lxml
 python -m pip install --upgrade pygal
 python -m pip install --upgrade requests
+
 ```
