@@ -72,13 +72,11 @@ def dateInputEnd(startDate):
             print("ERROR - Enter a Valid Date")
 
 def validate(date_info):
-    try:
-        datetime.datetime.strptime(date_info, '%Y-%m-%d')
-    except ValueError:
-        print("ERROR - Incorrect Data Format: should be YYYY-MM-DD")
+    datetime.datetime.strptime(date_info, '%Y-%m-%d')
 
 def makeGraph(data , chartType, chartStartDate, chartEndDate):
     ticker = data['Meta Data']['2. Symbol']
+    info = data['Meta Data']['1. Information']
     opening = []
     highs = []
     lows = []
@@ -87,21 +85,38 @@ def makeGraph(data , chartType, chartStartDate, chartEndDate):
     labels = list(data)[1]
     dataIwant = data[labels]
     for d in dataIwant:
-        date = d
-        if chartStartDate <= date <= chartEndDate:
-            dates.append(date)
+        date = str(d)
+        if chartStartDate == chartEndDate:
+            if str(chartStartDate) in date:
+                dateSplit = date.split(' ')[1]
+                dates.append(dateSplit)
 
-            dataOpening = (dataIwant[d]["1. open"])
-            opening.append(float(dataOpening))
+                dataOpening = (dataIwant[d]["1. open"])
+                opening.append(float(dataOpening))
 
-            dataHigh = (dataIwant[d]["2. high"])
-            highs.append(float(dataHigh))
+                dataHigh = (dataIwant[d]["2. high"])
+                highs.append(float(dataHigh))
 
-            dataLow = (dataIwant[d]["3. low"])
-            lows.append(float(dataLow))
+                dataLow = (dataIwant[d]["3. low"])
+                lows.append(float(dataLow))
 
-            dataClosing = (dataIwant[d]["4. close"])
-            closing.append(float(dataClosing))
+                dataClosing = (dataIwant[d]["4. close"])
+                closing.append(float(dataClosing))
+        else:
+            if chartStartDate <= date <= chartEndDate:
+                dates.append(date)
+
+                dataOpening = (dataIwant[d]["1. open"])
+                opening.append(float(dataOpening))
+
+                dataHigh = (dataIwant[d]["2. high"])
+                highs.append(float(dataHigh))
+
+                dataLow = (dataIwant[d]["3. low"])
+                lows.append(float(dataLow))
+
+                dataClosing = (dataIwant[d]["4. close"])
+                closing.append(float(dataClosing))
 
     line_chart = chartType
     line_chart.title = 'Stock Data for {}: {} to {} '.format(ticker, chartStartDate, chartEndDate)
