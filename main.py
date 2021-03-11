@@ -3,6 +3,7 @@ import os, json, datetime
 
 apikey = "O1RSZBGP6WA65EAI"
 
+# THIS FUNCTION ASKS THE USER FOR THE VARIABLES FOR THE CODE TO RUN (TICKER , CHART TYPE, CHART TIME SERIES, START DAY , END DAY)
 def userPrompt():
     tickerSymbol = input("Please Enter a Stock Ticker Symbol: ").upper();
 
@@ -133,8 +134,8 @@ def getJsonPage():
     symbol = info[0]
 
     chartType = info[1]
-    if chartType == 1: chartType = pygal.Bar()
-    elif chartType == 2: chartType = pygal.Line()
+    if chartType == 1: chartType = pygal.Bar(x_label_rotation=-20, x_labels_major_every=3, show_minor_x_labels=False)
+    elif chartType == 2: chartType = pygal.Line(x_label_rotation=-45, x_labels_major_every=3, show_minor_x_labels=False)
 
     chartTimeSeries = info[2]
     intraDayInfo = ""
