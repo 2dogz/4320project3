@@ -1,6 +1,7 @@
 import lxml, requests, pygal
 import os, json, datetime
 
+
 apikey = "O1RSZBGP6WA65EAI"
 
 # THIS FUNCTION ASKS THE USER FOR THE VARIABLES FOR THE CODE TO RUN (TICKER , CHART TYPE, CHART TIME SERIES, START DAY , END DAY)
@@ -51,26 +52,61 @@ def timeSeriesInput():
         except ValueError:
              print("ERROR - Enter an Integer")
 
+
+def dateNotInTheFuture(d):
+    curDate = datetime.date.today().strftime('%Y-%m-%d')
+    if curDate > d:
+        return d
+    else:
+        print("ERROR - Enter a Date In The Past")
+
 def dateInputStart():
     while True:
         try:
             startDate = input("\nEnter the Start Date (YYYY-MM-DD): ")
-            validate(startDate)
-            return startDate
+            if dateNotInTheFuture(startDate):
+                validate(startDate)
+                return startDate
         except ValueError:
             print("ERROR - Enter a Valid Date")
+
+# def dateInputStartOld():
+#     while True:
+#         try:
+#             curDate = datetime.date.today().strftime('%Y-%m-%d')
+#             startDate = input("\nEnter the Start Date (YYYY-MM-DD): ")
+#             if curDate > startDate:
+#                 validate(startDate)
+#                 return startDate
+#             else:
+#                 print("ERROR - Enter a Date In The Past")
+#         except ValueError:
+#             print("ERROR - Enter a Valid Date")
 
 def dateInputEnd(startDate):
     while True:
         try:
             endDate = input("\nEnter the End Date (YYYY-MM-DD): ")
-            validate(endDate)
-            if endDate < startDate:
-                print("The End Date Must be After The Start Date")
-            else:
-                return endDate
+            if dateNotInTheFuture(endDate):
+                validate(endDate)
+                if endDate < startDate:
+                    print("The End Date Must be After The Start Date")
+                else:
+                    return endDate
         except ValueError:
             print("ERROR - Enter a Valid Date")
+
+# def dateInputEndOld(startDate):
+#     while True:
+#         try:
+#             endDate = input("\nEnter the End Date (YYYY-MM-DD): ")
+#             validate(endDate)
+#             if endDate < startDate:
+#                 print("The End Date Must be After The Start Date")
+#             else:
+#                 return endDate
+#         except ValueError:
+#             print("ERROR - Enter a Valid Date")
 
 def validate(date_info):
     datetime.datetime.strptime(date_info, '%Y-%m-%d')
