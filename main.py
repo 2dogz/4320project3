@@ -1,4 +1,4 @@
-import lxml, requests, pygal, pytest
+import lxml, requests, pygal, re
 import os, json, datetime
 
 
@@ -56,17 +56,25 @@ def timeSeriesInput():
 
 def dateNotInTheFuture(d):
     curDate = datetime.date.today().strftime('%Y-%m-%d')
-    if curDate > d:
-        return d
-    else:
-        print("ERROR - Enter a Date In The Past")
+    try:
+        #FIRST WE CHECK TO SEE IF THE DATE IS IN THE PROPER FORMAT
+        if validate(d):
+            #NEXT WE CHECK IF THE INPUTTED DATE IS IN THE PAST
+            if curDate > d:
+                #IF THE INPUTTED DATE IS IN THE PAST, WE RETURN IT
+                return d
+            else:
+                #IF THE INPUTTED DATE IS IN THE FUTURE, WE RAISE AN ERROR
+                raise Exception
+    except Exception:
+        print("ERROR - Please Enter a Date That is In The Past - dateNotInTheFuture()")
+
 
 def dateInputStart():
     while True:
         try:
             startDate = input("\nEnter the Start Date (YYYY-MM-DD): ")
             if dateNotInTheFuture(startDate):
-                validate(startDate)
                 return startDate
         except ValueError:
             print("ERROR - Enter a Valid Date")
@@ -77,7 +85,6 @@ def dateInputEnd(startDate):
         try:
             endDate = input("\nEnter the End Date (YYYY-MM-DD): ")
             if dateNotInTheFuture(endDate):
-                validate(endDate)
                 if endDate < startDate:
                     print("The End Date Must be After The Start Date")
                 else:
@@ -86,8 +93,18 @@ def dateInputEnd(startDate):
             print("ERROR - Enter a Valid Date")
 
 
+
 def validate(date_info):
-    datetime.datetime.strptime(date_info, '%Y-%m-%d')
+    try:
+        dateRegex = '^[0-9]{4}.(1[0-2]|0[1-9]).(3[01]|[12][0-9]|0[1-9])'
+        if re.search(dateRegex, date_info):
+            datetime.datetime.strptime(date_info, '%Y-%m-%d')
+            return True
+        else:
+            raise ValueError
+    except ValueError:
+        print("ERROR - Incorrect data format: should be YYYY-MM-DD - Validate()")
+
 
 
 def makeGraph(data , chartType, chartTimeSeries, chartStartDate, chartEndDate):
