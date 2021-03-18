@@ -20,7 +20,7 @@ def userPrompt():
     unit = (tickerSymbol, chartType, chartTimeSeries, startDate, endDate)
     return unit
 
-
+# THIS FUNCTION ASKS THE USER FOR THE CHARTTYPE VARIABLE, IT SHOULD ONLY ACCEPT A 1 OR 2
 def chartInput():
     while True:
         try:
@@ -35,6 +35,7 @@ def chartInput():
                 return chartType
         except ValueError:
              print("ERROR - Enter an Integer")
+
 
 def timeSeriesInput():
     while True:
@@ -93,7 +94,6 @@ def dateInputEnd(startDate):
             print("ERROR - Enter a Valid Date")
 
 
-
 def validate(date_info):
     try:
         dateRegex = '^[0-9]{4}.(1[0-2]|0[1-9]).(3[01]|[12][0-9]|0[1-9])'
@@ -106,79 +106,13 @@ def validate(date_info):
         print("ERROR - Incorrect data format: should be YYYY-MM-DD - Validate()")
 
 
-
-# def makeGraph(data , chartType, chartTimeSeries, chartStartDate, chartEndDate):
-#     ticker = data['Meta Data']['2. Symbol']
-#     info = data['Meta Data']['1. Information']
-#
-#     opening = []
-#     highs = []
-#     lows = []
-#     closing = []
-#     dates = []
-#
-#     labels = list(data)[1]
-#     dataIwant = data[labels]
-#
-#     for d in dataIwant:
-#         date = str(d)
-#         #IF THE USER WANTS A GRAPH OF 1 DAY
-#         if chartStartDate == chartEndDate:
-#             #CHECK IF THE TIME SERIES IS SET TO INTRADAY
-#             if chartTimeSeries == 'TIME_SERIES_INTRADAY':
-#                 #CHECK IF THE CHART START DATE IS IN THE STRING OF DATE1
-#                 if str(chartStartDate) in date:
-#                     #IF IT IS - SPLIT THEM AT THE SPACE AND ONLY TAKE THE TIME PORTION.
-#                     dateSplit = date.split(' ')[1]
-#                     dates.append(dateSplit)
-#
-#                     dataOpening = (dataIwant[d]["1. open"])
-#                     opening.append(float(dataOpening))
-#
-#                     dataHigh = (dataIwant[d]["2. high"])
-#                     highs.append(float(dataHigh))
-#
-#                     dataLow = (dataIwant[d]["3. low"])
-#                     lows.append(float(dataLow))
-#
-#                     dataClosing = (dataIwant[d]["4. close"])
-#                     closing.append(float(dataClosing))
-#
-#         #IF THE USER WANTS A GRAPH OF OVER 1 DAY
-#         else:
-#             if chartStartDate <= date <= chartEndDate:
-#                 dates.append(date)
-#
-#                 dataOpening = (dataIwant[d]["1. open"])
-#                 opening.append(float(dataOpening))
-#
-#                 dataHigh = (dataIwant[d]["2. high"])
-#                 highs.append(float(dataHigh))
-#
-#                 dataLow = (dataIwant[d]["3. low"])
-#                 lows.append(float(dataLow))
-#
-#                 dataClosing = (dataIwant[d]["4. close"])
-#                 closing.append(float(dataClosing))
-#
-#     line_chart = chartType
-#     line_chart.title = 'Stock Data for {}: {} to {} '.format(ticker, chartStartDate, chartEndDate)
-#     line_chart.x_labels = dates
-#     line_chart.add('Opening', opening)
-#     line_chart.add('High', highs)
-#     line_chart.add('Low', lows)
-#     line_chart.add('Closing', closing)
-#     if dates == []:
-#         print("There Was Not Data Available For Your Input")
-#     else:
-#         line_chart.render_in_browser()
-
-
 def createData(jsonData, index, opening, highs, lows, closing, dates, mode):
     if mode == 1:
+        #IF WE ARE PULLING FOR DATA FOR THE SAME STOP AND START DATE, WE OMIT THE DATE AND ONLY SHOW THE TIME
         timeonly = str(index).split(' ')[1]
         dates.append(timeonly)
     else:
+        #THE INDEX IS THE DATE ON ALL FUNCTIONS
         dates.append(index)
 
     dataOpening = (jsonData[index]["1. open"])
@@ -212,10 +146,10 @@ def makeGraph(data , chartType, chartTimeSeries, chartStartDate, chartEndDate):
     dates = []
 
     labels = list(data)[1]
-    dataIwant = data[labels]
+    dailyInformation = data[labels]
 
-    for d in dataIwant:
-        date = str(d)
+    for i in dailyInformation:
+        date = str(i)
         #IF THE USER WANTS A GRAPH OF 1 DAY
         if chartStartDate == chartEndDate:
             #CHECK IF THE TIME SERIES IS SET TO INTRADAY
@@ -223,17 +157,17 @@ def makeGraph(data , chartType, chartTimeSeries, chartStartDate, chartEndDate):
                 #CHECK IF THE CHART START DATE IS IN THE STRING OF DATE1
                 if str(chartStartDate) in date:
                     #IF IT IS - SPLIT THEM AT THE SPACE AND ONLY TAKE THE TIME PORTION.
-                    createData(dataIwant, date, opening, highs, lows, closing, dates, 1)
-
+                    createData(dailyInformation, date, opening, highs, lows, closing, dates, 1)
 
         #IF THE USER WANTS A GRAPH OF OVER 1 DAY
         else:
+            #IF THE LOOP INDEX (AKA DATE) IS IN BETWEEN THE START AND STOP DATE, PULL THE DATA
             if chartStartDate <= date <= chartEndDate:
-                createData(dataIwant, date, opening, highs, lows, closing, dates, 0)
-
+                createData(dailyInformation, date, opening, highs, lows, closing, dates, 0)
 
     line_chart = chartType
     line_chart.title = 'Stock Data for {}: {} to {} '.format(ticker, chartStartDate, chartEndDate)
+    #WE NEED TO REVERSE THE LISTS BECAUSE OUR LISTS ARE BACKWARDS AT THE MOMENT
     reverseLists(opening, highs, lows, closing, dates)
     line_chart.x_labels = dates
     line_chart.add('Opening', opening)
@@ -256,8 +190,8 @@ def getJsonPage():
 
     #  THOSE VARIABLES ARE BROKEN DOWN INTO API ENDPOINT COMPONENTS E.G (TIME_SERIES_INTRADAY,TIME_SERIES_DAILY) OR THEIR RESPECTIVE DATES TO BE LOOKED FOR WITHIN THE API RESULTS
     chartType = info[1]
-    if chartType == 1: chartType = pygal.Bar(x_label_rotation=-45, x_labels_major_every=3, show_minor_x_labels=False)
-    elif chartType == 2: chartType = pygal.Line(x_label_rotation=-45, x_labels_major_every=3, show_minor_x_labels=False)
+    if chartType == 1: chartType = pygal.Bar(x_label_rotation=-45, x_labels_major_every=1, show_minor_x_labels=False)
+    elif chartType == 2: chartType = pygal.Line(x_label_rotation=-45, x_labels_major_every=1, show_minor_x_labels=False)
 
     chartTimeSeries = info[2]
     intraDayInfo = ""
