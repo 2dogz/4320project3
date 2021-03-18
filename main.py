@@ -1,12 +1,15 @@
-import lxml, requests, pygal, re
-import os, json, datetime
+import datetime
 
+import pygal
+import re
+import requests
 
 apikey = "O1RSZBGP6WA65EAI"
 
-# THIS FUNCTION ASKS THE USER FOR THE VARIABLES FOR THE CODE TO RUN (TICKER , CHART TYPE, CHART TIME SERIES, START DAY , END DAY)
+# THIS FUNCTION ASKS THE USER FOR THE VARIABLES FOR THE CODE TO RUN
+# (TICKER , CHART TYPE, CHART TIME SERIES, START DAY , END DAY)
 def userPrompt():
-    tickerSymbol = input("Please Enter a Stock Ticker Symbol: ").upper();
+    tickerSymbol = input("Please Enter a Stock Ticker Symbol: ").upper()
 
     chartType = chartInput()
 
@@ -20,6 +23,7 @@ def userPrompt():
     unit = (tickerSymbol, chartType, chartTimeSeries, startDate, endDate)
     return unit
 
+
 # THIS FUNCTION ASKS THE USER FOR THE CHARTTYPE VARIABLE, IT SHOULD ONLY ACCEPT A 1 OR 2
 def chartInput():
     while True:
@@ -28,13 +32,13 @@ def chartInput():
             print("------------")
             print("1. Bar")
             print("2. Line\n")
-            chartType = int(input("Please Enter a Chart Type (1, 2): "));
-            if chartType not in [1,2]:
+            chartType = int(input("Please Enter a Chart Type (1, 2): "))
+            if chartType not in [1, 2]:
                 print("Enter a 1 or 2 for Chart Type")
             else:
                 return chartType
         except ValueError:
-             print("ERROR - Enter an Integer")
+            print("ERROR - Enter an Integer")
 
 
 def timeSeriesInput():
@@ -46,26 +50,26 @@ def timeSeriesInput():
             print("2. Daily")
             print("3. Weekly")
             print("4. Monthly\n")
-            chartTimeSeries = int(input("Please Enter a Chart Time Series(1,2,3,4): "));
+            chartTimeSeries = int(input("Please Enter a Chart Time Series(1,2,3,4): "))
             if chartTimeSeries not in [1, 2, 3, 4]:
                 print("Enter a 1, 2, 3, or 4 for Chart Time Series")
             else:
                 return chartTimeSeries
         except ValueError:
-             print("ERROR - Enter an Integer")
+            print("ERROR - Enter an Integer")
 
 
-def dateNotInTheFuture(d):
-    curDate = datetime.date.today().strftime('%Y-%m-%d')
+def dateNotInTheFuture(date_info):
+    currentDate = datetime.date.today().strftime('%Y-%m-%d')
     try:
-        #FIRST WE CHECK TO SEE IF THE DATE IS IN THE PROPER FORMAT
-        if validate(d):
-            #NEXT WE CHECK IF THE INPUTTED DATE IS IN THE PAST
-            if curDate > d:
-                #IF THE INPUTTED DATE IS IN THE PAST, WE RETURN IT
-                return d
+        # FIRST WE CHECK TO SEE IF THE DATE IS IN THE PROPER FORMAT
+        if validate(date_info):
+            # NEXT WE CHECK IF THE INPUTTED DATE IS IN THE PAST
+            if currentDate > date_info:
+                # IF THE INPUTTED DATE IS IN THE PAST, WE RETURN IT
+                return date_info
             else:
-                #IF THE INPUTTED DATE IS IN THE FUTURE, WE RAISE AN ERROR
+                # IF THE INPUTTED DATE IS IN THE FUTURE, WE RAISE AN ERROR
                 raise Exception
     except Exception:
         print("ERROR - Please Enter a Date That is In The Past - dateNotInTheFuture()")
@@ -108,11 +112,11 @@ def validate(date_info):
 
 def createData(jsonData, index, opening, highs, lows, closing, dates, mode):
     if mode == 1:
-        #IF WE ARE PULLING FOR DATA FOR THE SAME STOP AND START DATE, WE OMIT THE DATE AND ONLY SHOW THE TIME
+        # IF WE ARE PULLING FOR DATA FOR THE SAME STOP AND START DATE, WE OMIT THE DATE AND ONLY SHOW THE TIME
         timeonly = str(index).split(' ')[1]
         dates.append(timeonly)
     else:
-        #THE INDEX IS THE DATE ON ALL FUNCTIONS
+        # THE INDEX IS THE DATE ON ALL FUNCTIONS
         dates.append(index)
 
     dataOpening = (jsonData[index]["1. open"])
@@ -129,15 +133,14 @@ def createData(jsonData, index, opening, highs, lows, closing, dates, mode):
 
 
 def reverseLists(opening, highs, lows, closing, dates):
-    opening = opening.reverse()
-    highs = highs.reverse()
-    lows = lows.reverse()
-    closing = closing.reverse()
-    dates = dates.reverse()
+    opening.reverse()
+    highs.reverse()
+    lows.reverse()
+    closing.reverse()
+    dates.reverse()
 
-def makeGraph(data , chartType, chartTimeSeries, chartStartDate, chartEndDate):
+def makeGraph(data, chartType, chartTimeSeries, chartStartDate, chartEndDate):
     ticker = data['Meta Data']['2. Symbol']
-    info = data['Meta Data']['1. Information']
 
     opening = []
     highs = []
@@ -150,37 +153,37 @@ def makeGraph(data , chartType, chartTimeSeries, chartStartDate, chartEndDate):
 
     for i in dailyInformation:
         date = str(i)
-        #IF THE USER WANTS A GRAPH OF 1 DAY
+        # IF THE USER WANTS A GRAPH OF 1 DAY
         if chartStartDate == chartEndDate:
-            #CHECK IF THE TIME SERIES IS SET TO INTRADAY
+            # CHECK IF THE TIME SERIES IS SET TO INTRADAY
             if chartTimeSeries == 'TIME_SERIES_INTRADAY':
-                #CHECK IF THE CHART START DATE IS IN THE STRING OF DATE1
+                # CHECK IF THE CHART START DATE IS IN THE STRING OF DATE1
                 if str(chartStartDate) in date:
-                    #IF IT IS - SPLIT THEM AT THE SPACE AND ONLY TAKE THE TIME PORTION.
+                    # IF IT IS - SPLIT THEM AT THE SPACE AND ONLY TAKE THE TIME PORTION.
                     createData(dailyInformation, date, opening, highs, lows, closing, dates, 1)
 
-        #IF THE USER WANTS A GRAPH OF OVER 1 DAY
+        # IF THE USER WANTS A GRAPH OF OVER 1 DAY
         else:
-            #IF THE LOOP INDEX (AKA DATE) IS IN BETWEEN THE START AND STOP DATE, PULL THE DATA
+            # IF THE LOOP INDEX (AKA DATE) IS IN BETWEEN THE START AND STOP DATE, PULL THE DATA
             if chartStartDate <= date <= chartEndDate:
                 createData(dailyInformation, date, opening, highs, lows, closing, dates, 0)
 
     line_chart = chartType
     line_chart.title = 'Stock Data for {}: {} to {} '.format(ticker, chartStartDate, chartEndDate)
-    #WE NEED TO REVERSE THE LISTS BECAUSE OUR LISTS ARE BACKWARDS AT THE MOMENT
+    # WE NEED TO REVERSE THE LISTS BECAUSE OUR LISTS ARE BACKWARDS AT THE MOMENT
     reverseLists(opening, highs, lows, closing, dates)
     line_chart.x_labels = dates
     line_chart.add('Opening', opening)
     line_chart.add('High', highs)
     line_chart.add('Low', lows)
     line_chart.add('Closing', closing)
-    if dates == []:
+    if not dates:
         print("There Was Not Data Available For Your Input")
     else:
         line_chart.render_in_browser()
 
 
-#THE PURPOSE OF THE getJsonPage FUNCTION IS TO RUN THE PROGRAM
+# THE PURPOSE OF THE getJsonPage FUNCTION IS TO RUN THE PROGRAM
 def getJsonPage():
     # FIRST WE CALL userPrompt() WHICH RETURNS THE Symbol, chartType, chartTimeSeries , chartStartDate, chartEndDate
     info = userPrompt()
@@ -188,7 +191,8 @@ def getJsonPage():
     # THEN WE ASSIGN VARIABLES BY THE TUPLE INDEX
     symbol = info[0]
 
-    #  THOSE VARIABLES ARE BROKEN DOWN INTO API ENDPOINT COMPONENTS E.G (TIME_SERIES_INTRADAY,TIME_SERIES_DAILY) OR THEIR RESPECTIVE DATES TO BE LOOKED FOR WITHIN THE API RESULTS
+    # THOSE VARIABLES ARE BROKEN DOWN INTO API ENDPOINT COMPONENTS
+    # E.G (TIME_SERIES_INTRADAY,TIME_SERIES_DAILY) OR THEIR RESPECTIVE DATES TO BE LOOKED FOR WITHIN THE API RESULTS
     chartType = info[1]
     if chartType == 1: chartType = pygal.Bar(x_label_rotation=-45, x_labels_major_every=1, show_minor_x_labels=False)
     elif chartType == 2: chartType = pygal.Line(x_label_rotation=-45, x_labels_major_every=1, show_minor_x_labels=False)
@@ -197,7 +201,7 @@ def getJsonPage():
     intraDayInfo = ""
     if chartTimeSeries == 1:
         chartTimeSeries = "TIME_SERIES_INTRADAY"
-        #WE HAVE TO SET THE INTERVAL IF THE SELECTED INPUT IS INTRADAY
+        # WE HAVE TO SET THE INTERVAL IF THE SELECTED INPUT IS INTRADAY
         intraDayInfo = "&interval=60min"
     elif chartTimeSeries == 2: chartTimeSeries = "TIME_SERIES_DAILY"
     elif chartTimeSeries == 3: chartTimeSeries = "TIME_SERIES_WEEKLY"
@@ -206,14 +210,18 @@ def getJsonPage():
     chartStartDate = info[3]
     chartEndDate = info[4]
 
-    # AFTER THE VARIABLES ARE ASSIGNED WE BUILD THE LINK AND EXECUTE THE GET REQUEST. -> WE PRINT THE BUILT URL TO THE CONSOLE FOR DEBUGGING PURPOSES
-    req = requests.get("https://www.alphavantage.co/query?function={}&symbol={}{}&apikey={}".format(chartTimeSeries, symbol, intraDayInfo, apikey))
+    # AFTER THE VARIABLES ARE ASSIGNED WE BUILD THE LINK AND EXECUTE THE GET REQUEST.
+    # -> WE PRINT THE BUILT URL TO THE CONSOLE FOR DEBUGGING PURPOSES
+    baseLink = "https://www.alphavantage.co/query?"
+    queryData = "function={}&symbol={}{}&apikey={}".format(chartTimeSeries, symbol, intraDayInfo, apikey)
+    req = requests.get(baseLink + queryData)
     print(req.url)
 
     # WE LOAD THE REQUEST RESPONSE INTO A VARIABLE CALLED DATA AND USE THE JSON() FUNCTION TO PARSE THE TEXT.
     data = req.json()
 
-    # FINALLY, WE CHECK IF THERE WAS A STRING OF 'INVALID API CALL' IN THE RESPONSE AND IF THERE IS WE PRINT AN ERROR MESSAGE INSTEAD OF BUILDING THE GRAPH IN BROWSER
+    # FINALLY, WE CHECK IF THERE WAS A STRING OF 'INVALID API CALL' IN THE RESPONSE
+    # IF THERE IS WE PRINT AN ERROR MESSAGE INSTEAD OF BUILDING THE GRAPH IN BROWSER
     if 'Invalid API call' not in req.text:
         makeGraph(data, chartType, chartTimeSeries, chartStartDate, chartEndDate)
     else:
@@ -227,6 +235,7 @@ def main():
         flag = input("Would you like to continue? Enter (Y/N)")
         if flag.lower() != "y":
             keepGoing = False
+
 
 if __name__ == '__main__':
     main()
