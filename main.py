@@ -107,6 +107,100 @@ def validate(date_info):
 
 
 
+# def makeGraph(data , chartType, chartTimeSeries, chartStartDate, chartEndDate):
+#     ticker = data['Meta Data']['2. Symbol']
+#     info = data['Meta Data']['1. Information']
+#
+#     opening = []
+#     highs = []
+#     lows = []
+#     closing = []
+#     dates = []
+#
+#     labels = list(data)[1]
+#     dataIwant = data[labels]
+#
+#     for d in dataIwant:
+#         date = str(d)
+#         #IF THE USER WANTS A GRAPH OF 1 DAY
+#         if chartStartDate == chartEndDate:
+#             #CHECK IF THE TIME SERIES IS SET TO INTRADAY
+#             if chartTimeSeries == 'TIME_SERIES_INTRADAY':
+#                 #CHECK IF THE CHART START DATE IS IN THE STRING OF DATE1
+#                 if str(chartStartDate) in date:
+#                     #IF IT IS - SPLIT THEM AT THE SPACE AND ONLY TAKE THE TIME PORTION.
+#                     dateSplit = date.split(' ')[1]
+#                     dates.append(dateSplit)
+#
+#                     dataOpening = (dataIwant[d]["1. open"])
+#                     opening.append(float(dataOpening))
+#
+#                     dataHigh = (dataIwant[d]["2. high"])
+#                     highs.append(float(dataHigh))
+#
+#                     dataLow = (dataIwant[d]["3. low"])
+#                     lows.append(float(dataLow))
+#
+#                     dataClosing = (dataIwant[d]["4. close"])
+#                     closing.append(float(dataClosing))
+#
+#         #IF THE USER WANTS A GRAPH OF OVER 1 DAY
+#         else:
+#             if chartStartDate <= date <= chartEndDate:
+#                 dates.append(date)
+#
+#                 dataOpening = (dataIwant[d]["1. open"])
+#                 opening.append(float(dataOpening))
+#
+#                 dataHigh = (dataIwant[d]["2. high"])
+#                 highs.append(float(dataHigh))
+#
+#                 dataLow = (dataIwant[d]["3. low"])
+#                 lows.append(float(dataLow))
+#
+#                 dataClosing = (dataIwant[d]["4. close"])
+#                 closing.append(float(dataClosing))
+#
+#     line_chart = chartType
+#     line_chart.title = 'Stock Data for {}: {} to {} '.format(ticker, chartStartDate, chartEndDate)
+#     line_chart.x_labels = dates
+#     line_chart.add('Opening', opening)
+#     line_chart.add('High', highs)
+#     line_chart.add('Low', lows)
+#     line_chart.add('Closing', closing)
+#     if dates == []:
+#         print("There Was Not Data Available For Your Input")
+#     else:
+#         line_chart.render_in_browser()
+
+
+def createData(jsonData, index, opening, highs, lows, closing, dates, mode):
+    if mode == 1:
+        timeonly = str(index).split(' ')[1]
+        dates.append(timeonly)
+    else:
+        dates.append(index)
+
+    dataOpening = (jsonData[index]["1. open"])
+    opening.append(float(dataOpening))
+
+    dataHigh = (jsonData[index]["2. high"])
+    highs.append(float(dataHigh))
+
+    dataLow = (jsonData[index]["3. low"])
+    lows.append(float(dataLow))
+
+    dataClosing = (jsonData[index]["4. close"])
+    closing.append(float(dataClosing))
+
+
+def reverseLists(opening, highs, lows, closing, dates):
+    opening = opening.reverse()
+    highs = highs.reverse()
+    lows = lows.reverse()
+    closing = closing.reverse()
+    dates = dates.reverse()
+
 def makeGraph(data , chartType, chartTimeSeries, chartStartDate, chartEndDate):
     ticker = data['Meta Data']['2. Symbol']
     info = data['Meta Data']['1. Information']
@@ -129,40 +223,18 @@ def makeGraph(data , chartType, chartTimeSeries, chartStartDate, chartEndDate):
                 #CHECK IF THE CHART START DATE IS IN THE STRING OF DATE1
                 if str(chartStartDate) in date:
                     #IF IT IS - SPLIT THEM AT THE SPACE AND ONLY TAKE THE TIME PORTION.
-                    dateSplit = date.split(' ')[1]
-                    dates.append(dateSplit)
+                    createData(dataIwant, date, opening, highs, lows, closing, dates, 1)
 
-                    dataOpening = (dataIwant[d]["1. open"])
-                    opening.append(float(dataOpening))
-
-                    dataHigh = (dataIwant[d]["2. high"])
-                    highs.append(float(dataHigh))
-
-                    dataLow = (dataIwant[d]["3. low"])
-                    lows.append(float(dataLow))
-
-                    dataClosing = (dataIwant[d]["4. close"])
-                    closing.append(float(dataClosing))
 
         #IF THE USER WANTS A GRAPH OF OVER 1 DAY
         else:
             if chartStartDate <= date <= chartEndDate:
-                dates.append(date)
+                createData(dataIwant, date, opening, highs, lows, closing, dates, 0)
 
-                dataOpening = (dataIwant[d]["1. open"])
-                opening.append(float(dataOpening))
-
-                dataHigh = (dataIwant[d]["2. high"])
-                highs.append(float(dataHigh))
-
-                dataLow = (dataIwant[d]["3. low"])
-                lows.append(float(dataLow))
-
-                dataClosing = (dataIwant[d]["4. close"])
-                closing.append(float(dataClosing))
 
     line_chart = chartType
     line_chart.title = 'Stock Data for {}: {} to {} '.format(ticker, chartStartDate, chartEndDate)
+    reverseLists(opening, highs, lows, closing, dates)
     line_chart.x_labels = dates
     line_chart.add('Opening', opening)
     line_chart.add('High', highs)
