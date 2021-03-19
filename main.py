@@ -14,13 +14,17 @@ def userPrompt():
     chartType = chartInput()
 
     chartTimeSeries = timeSeriesInput()
+    if chartTimeSeries == 1:
+        intradayInterval = intradayIntervalInput()
+    else:
+        intradayInterval = ""
 
     startDate = dateInputStart()
 
     endDate = dateInputEnd(startDate)
 
     # THIS RETURNS A TUPLE TO THE getJsonPage() FUNCTION
-    unit = (tickerSymbol, chartType, chartTimeSeries, startDate, endDate)
+    unit = (tickerSymbol, chartType, chartTimeSeries, startDate, endDate, intradayInterval)
     return unit
 
 
@@ -58,6 +62,23 @@ def timeSeriesInput():
         except ValueError:
             print("ERROR - Enter an Integer")
 
+def intradayIntervalInput():
+    while True:
+        try:
+            print("\nSelect the Interval of the Intraday graph you want to Generate")
+            print("---------------------------------------------------------")
+            print("1. 1 minute")
+            print("2. 5 minute")
+            print("3. 15 minute")
+            print("4. 30 minute")
+            print("5. 60 minute\n")
+            intradayInterval = int(input("Please Enter a Intraday Interval(1,2,3,4,5): "))
+            if intradayInterval not in [1, 2, 3, 4, 5]:
+                print("Enter a 1, 2, 3, 4, or 5 for Intraday Interval")
+            else:
+                return intradayInterval
+        except ValueError:
+            print("ERROR - Enter an Integer")
 
 def dateNotInTheFuture(date_info):
     currentDate = datetime.date.today().strftime('%Y-%m-%d')
@@ -198,11 +219,14 @@ def getJsonPage():
     elif chartType == 2: chartType = pygal.Line(x_label_rotation=-45, x_labels_major_every=1, show_minor_x_labels=False)
 
     chartTimeSeries = info[2]
-    intraDayInfo = ""
-    if chartTimeSeries == 1:
-        chartTimeSeries = "TIME_SERIES_INTRADAY"
-        # WE HAVE TO SET THE INTERVAL IF THE SELECTED INPUT IS INTRADAY
-        intraDayInfo = "&interval=60min"
+    intraDayInfo = info[5]
+    if intraDayInfo == 1: intraDayInfo = "&interval=1min"
+    elif intraDayInfo == 2: intraDayInfo = "&interval=5min"
+    elif intraDayInfo == 3: intraDayInfo = "&interval=15min"
+    elif intraDayInfo == 4: intraDayInfo = "&interval=30min"
+    elif intraDayInfo == 5: intraDayInfo = "&interval=60min"
+
+    if chartTimeSeries == 1: chartTimeSeries = "TIME_SERIES_INTRADAY"
     elif chartTimeSeries == 2: chartTimeSeries = "TIME_SERIES_DAILY"
     elif chartTimeSeries == 3: chartTimeSeries = "TIME_SERIES_WEEKLY"
     elif chartTimeSeries == 4: chartTimeSeries = "TIME_SERIES_MONTHLY"
