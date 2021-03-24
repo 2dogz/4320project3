@@ -186,7 +186,7 @@ def makeGraph(data, chartType, chartTimeSeries, chartStartDate, chartEndDate):
         # IF THE USER WANTS A GRAPH OF OVER 1 DAY
         else:
             # IF THE LOOP INDEX (AKA DATE) IS IN BETWEEN THE START AND STOP DATE, PULL THE DATA
-            if chartStartDate <= date <= chartEndDate:
+            if chartStartDate < date < chartEndDate or chartEndDate in date:
                 createData(dailyInformation, date, opening, highs, lows, closing, dates, 0)
 
     line_chart = chartType
@@ -239,7 +239,7 @@ def getJsonPage():
     baseLink = "https://www.alphavantage.co/query?"
     queryData = "function={}&symbol={}{}&apikey={}".format(chartTimeSeries, symbol, intraDayInfo, apikey)
     req = requests.get(baseLink + queryData)
-    print(req.url)
+    #print(req.url)
 
     # WE LOAD THE REQUEST RESPONSE INTO A VARIABLE CALLED DATA AND USE THE JSON() FUNCTION TO PARSE THE TEXT.
     data = req.json()
